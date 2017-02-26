@@ -1,0 +1,83 @@
+---
+title: "Application_Timing"
+author: "Meghan Duffy"
+date: "February 26, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question: Is there a difference in when men and women first apply for jobs?
+Analysis was suggested by an anonymous postdoc, who noted that there appears to be a difference in when men and women first apply for faculty positions, based on data in the 2016-2017 job wiki. First, let's recreate that figure, using a version of the "anonymous qualifications" page downloaded on February 26, 2017 from:
+https://docs.google.com/spreadsheets/d/1rOjzt71IBfaz5gYuiVyJxzoCAD8WqM39eUjUhgBEFuU/edit#gid=1893361791
+
+For "# years in postdoc" column:
+Changed the "< 1" to "0.5"
+Changed a "4 + 2 as RA" to 6
+Changed "3 + 14 alt-ac" to NA
+
+For "# 1st author peer-reviewed papers" column:
+Changed "13 journal + 15 conference" to NA
+
+For other papers column:
+Changed "19 journal + 8 conference" to NA
+
+For major grants column:
+Changed "0 (2 if you count fellowships)" to 0
+
+For years on market:
+Changed "< 1" to "0.5"
+
+For number applications:
+removed ~ and just went with number they said
+for anything else, changed to NA
+
+```{r,load libraries,message=FALSE,echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(cowplot)
+library(stringr)
+```
+
+```{r, load data}
+df <- read.csv("EcoEvoJobApps20162017AnonQualsedited.csv", na.strings = "?")
+head(df)
+colnames(df)
+str(df)
+```
+### Make figure based on one that was sent to me
+```{r, plot year Phd vs number apps}
+YearGender <- 
+  df %>%
+  filter(!is.na(Postdoc)) %>%
+  filter(Number.apps >0) %>%
+  group_by(Gender,Postdoc) %>%
+  summarise(n=n()) %>%
+  mutate(rel.freq = round(100 * n/sum(n), 0))
+
+yeargenderplot <- df %>%
+  filter(!is.na(Postdoc)) %>%
+  filter(Number.apps >0) %>%
+  ggplot(aes(x = Postdoc, fill=Gender)) +
+  geom_histogram(binwidth=1.0, boundary=-0.5, position="dodge") +
+  xlab("Year of PhD") +
+  theme_bw() 
+
+yeargenderplot
+
+save_plot("yeargenderplot.jpg", yeargenderplot)
+```
+
+### Looking at years on market
+```{r, years on market plot}
+yearsonmarketplot <- df %>%
+  filter(!is.na(Years.on.market)) %>%
+  ggplot(aes(x = Years.on.market, fill=Gender)) +
+  geom_histogram(binwidth=1.0, boundary=-0.5, position="dodge") +
+  xlab("Years on market") +
+  theme_bw() 
+
+yearsonmarketplot
+```
