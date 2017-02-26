@@ -47,8 +47,8 @@ head(df)
 colnames(df)
 str(df)
 ```
-### Make figure based on one that was sent to me
-```{r, plot year Phd vs number apps}
+### Make figure based on one that was sent to me (Year PhD of applicants by gender)
+```{r, plot year Phd of applicants}
 YearGender <- 
   df %>%
   filter(!is.na(Postdoc)) %>%
@@ -80,4 +80,35 @@ yearsonmarketplot <- df %>%
   theme_bw() 
 
 yearsonmarketplot
+```
+
+### Does the year gender plot pattern hold for 2015-2016?
+```{r, load 2015-2016 data}
+df2015 <- read.csv("EcoEvoJobApps20152016AnonQualsedited.csv", na.strings = "?")
+head(df)
+colnames(df)
+str(df)
+```
+
+```{r, plot year Phd for 2015-2016}
+YearGender2015 <- 
+  df2015 %>%
+  filter(!is.na(PhD.year)) %>%
+  filter(Number.apps >0) %>%
+  group_by(Gender,PhD.year) %>%
+  summarise(n=n()) %>%
+  mutate(rel.freq = round(100 * n/sum(n), 0))
+
+yeargenderplot2015 <- df2015 %>%
+  filter(!is.na(PhD.year)) %>%
+  filter(!is.na(Gender)) %>%
+  filter(Number.apps >0) %>%
+  ggplot(aes(x = PhD.year, fill=Gender)) +
+  geom_histogram(binwidth=1.0, boundary=-0.5, position="dodge") +
+  xlab("Year of PhD") +
+  theme_bw() 
+
+yeargenderplot2015
+
+save_plot("yeargenderplot2015.jpg", yeargenderplot2015)
 ```
