@@ -67,7 +67,7 @@ yeargenderplot <- df %>%
 
 yeargenderplot
 
-save_plot("yeargenderplot.jpg", yeargenderplot)
+save_plot("yeargenderplot.jpg", yeargenderplot, base_height=4, base_width = 6)
 ```
 
 ### Looking at years on market
@@ -110,5 +110,63 @@ yeargenderplot2015 <- df2015 %>%
 
 yeargenderplot2015
 
-save_plot("yeargenderplot2015.jpg", yeargenderplot2015)
+save_plot("yeargenderplot2015.jpg", yeargenderplot2015, base_height=4, base_width = 6)
+```
+## Moving on to look at data from Dynamic Ecology poll
+Poll: https://dynamicecology.wordpress.com/2017/02/27/poll-what-determines-when-people-start-applying-for-jobs/
+
+Note: I deleted the data on whether people were from underrepresented groups from the version of the spreadsheet I put on github. There were so few people in several of the categories that I was concerned that it might be possible to identify individuals (e.g., if someone from one of those groups had told a friend they had filled out the survey).
+
+```{r, import poll data}
+polldf <- read.csv("JobAppPolltrimmed.csv", na.strings = "?")
+head(polldf)
+colnames(polldf)
+str(polldf)
+```
+
+```{r, plot poll results for all years}
+PollGenderAllYears <- 
+  polldf %>%
+  filter(!is.na(FirstApplied01)) %>%
+  filter(Gender==c("Male") | Gender==c("Female")) %>%
+  group_by(Gender,FirstApplied01) %>%
+  summarise(n=n()) %>%
+  mutate(rel.freq = round(100 * n/sum(n), 0))
+
+yeargenderplotpollallyears <- polldf %>%
+  filter(!is.na(FirstApplied01)) %>%
+  filter(Gender==c("Male") | Gender==c("Female")) %>%
+  ggplot(aes(x = FirstApplied01, fill=Gender)) +
+  geom_histogram(binwidth=1.0, boundary=-0.5, position="dodge") +
+  xlab("Years since PhD") +
+  theme_bw() 
+
+yeargenderplotpollallyears
+
+save_plot("yeargenderplotpollallyears.jpg", yeargenderplotpollallyears, base_height=4, base_width = 6)
+```
+
+
+```{r, plot poll results for past 5 years}
+PollGenderLast5Years <- 
+  polldf %>%
+  filter(!is.na(FirstApplied01)) %>%
+  filter(Gender==c("Male") | Gender==c("Female")) %>%
+  filter(PhD01 > 2011) %>%
+  group_by(Gender,FirstApplied01) %>%
+  summarise(n=n()) %>%
+  mutate(rel.freq = round(100 * n/sum(n), 0))
+
+yeargenderplotpolllast5years <- polldf %>%
+  filter(!is.na(FirstApplied01)) %>%
+  filter(Gender==c("Male") | Gender==c("Female")) %>%
+  filter(PhD01 > 2011) %>%
+  ggplot(aes(x = FirstApplied01, fill=Gender)) +
+  geom_histogram(binwidth=1.0, boundary=-0.5, position="dodge") +
+  xlab("Years since PhD") +
+  theme_bw() 
+
+yeargenderplotpolllast5years
+
+save_plot("yeargenderplotpolllast5years.jpg", yeargenderplotpolllast5years, base_height=4, base_width = 6)
 ```
